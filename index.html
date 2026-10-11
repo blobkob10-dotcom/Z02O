@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Second Challenge</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; }
+
+        /* Screen 1: Main Content */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        /* Screen 2: Password Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            color: white;
+            /* Moving Background Animation */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .login-box input {
+            padding: 10px; margin: 15px 0; width: 80%;
+            font-size: 1rem; border: none; border-radius: 5px;
+        }
+
+        .login-box button {
+            padding: 10px 20px; font-size: 1rem; cursor: pointer;
+            border: none; background: #23a6d5; color: white; border-radius: 5px;
+        }
+
+        /* Screen 3: Video Overlay */
+        .video-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; background: black; z-index: 20;
+        }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SCREEN 1: MAIN CONTENT -->
+    <div class="main-content">
+        <h1>Welcome to the Secret Website 👀</h1>
+    </div>
+
+    <!-- SCREEN 2: PASSWORD OVERLAY -->
+    <div id="passwordOverlay" class="overlay">
+        <div class="login-box">
+            <h2>Time's up! Enter Password</h2>
+            <input type="password" id="passwordInput" placeholder="Password is 'open'">
+            <br>
+            <button onclick="checkPassword()">Submit</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: VIDEO OVERLAY -->
+    <div id="videoOverlay" class="video-container">
+        <!-- Replace with your embed video link. Note: YouTube API is needed for perfect redirect on end, so this uses a standard timeout fallback for simplicity -->
+        <div id="player"></div>
+    </div>
+
+    <script>
+        // Check if user already completed the challenge this session
+        const hasAccess = sessionStorage.getItem('unlocked');
+
+        if (!hasAccess) {
+            // Trigger password overlay after 4 seconds (4000 milliseconds)
+            setTimeout(() => {
+                document.getElementById('passwordOverlay').style.display = 'flex';
+            }, 4000);
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            // Set your desired password here (Currently: 'open')
+            if (password === 'open') {
+                showVideo();
+            } else {
+                alert('Wrong password!');
+            }
+        }
+
+        function showVideo() {
+            document.getElementById('passwordOverlay').style.display = 'none';
+            document.getElementById('videoOverlay').style.display = 'block';
+            
+            // Load YouTube Iframe Player API to detect when video finishes
+            var tag = document.createElement('script');
+            tag.src = "https://youtube.com";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+
+        // This function creates an <iframe> after the API code downloads.
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'dQw4w9WgXcQ', // REPLACE WITH YOUR YOUTUBE VIDEO ID
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // When the video ends, grant permanent access and hide everything
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.ENDED) {
+                // Store state so they aren't locked out again during this session
+                sessionStorage.setItem('unlocked', 'true');
+                // Hide video layer
+                document.getElementById('videoOverlay').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+      
